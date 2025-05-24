@@ -254,7 +254,7 @@ body {
 .stat {
     display: flex;
     align-items: center;
-    height: 8px;
+    height: 55px;
     gap: 5px;
     font-size: 0.9rem;
 }
@@ -310,7 +310,7 @@ body {
     border-radius: 12px;
     padding: 15px;
     display: flex;
-    height:76px;
+    height: 100px;
     align-items: center;
     gap: 12px;
     box-shadow: 0 3px 10px var(--shadow-color);
