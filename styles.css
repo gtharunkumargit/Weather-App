@@ -114,8 +114,8 @@ body {
 .search-container {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 0;
+    gap: 15px;
+    margin-bottom: 10px;
 }
 
 .search-input {
@@ -170,7 +170,7 @@ body {
     overflow-y: auto;
     padding: 20px;
     scrollbar-width: thin;
-    scrollbar-color: var(--primary-color) transparent;
+    scrollbar-color: rgb(252, 190, 83) transparent;
 }
 
 .weather-display::-webkit-scrollbar {
@@ -629,4 +629,199 @@ body {
 
 #currentTime {
     font-family: 'Courier New', monospace;
+}
+/* New styles for Fahrenheit toggle and sun times */
+.unit-toggle {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 2px 8px;
+    margin-left: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.unit-toggle:hover {
+    background: var(--secondary-color);
+    transform: translateY(-1px);
+}
+
+.sun-times {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    justify-content: flex-end;
+}
+
+.sun-times .stat i {
+    color: var(--accent-color);
+}
+.weather-parameter-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.parameter-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 3px 10px var(--shadow-color);
+    transition: transform 0.3s ease;
+}
+
+.parameter-card:hover {
+    transform: translateY(-5px);
+}
+
+.parameter-card i {
+    font-size: 1.8rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.parameter-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.parameter-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.parameter-name {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-top: 3px;
+}
+
+/* Card-specific colors */
+.wind-card i { background: rgba(33, 150, 243, 0.2); color: #2196F3; }
+.humidity-card i { background: rgba(3, 169, 244, 0.2); color: #03A9F4; }
+.pressure-card i { background: rgba(76, 175, 80, 0.2); color: #4CAF50; }
+.rain-card i { background: rgba(0, 188, 212, 0.2); color: #00BCD4; }
+.sunrise-card i { background: rgba(255, 193, 7, 0.2); color: #FFC107; }
+.sunset-card i { background: rgba(255, 152, 0, 0.2); color: #FF9800; }
+/* Keep all your existing CSS below this line */
+/* Weather Parameter Boxes Styling */
+.param-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 15px 0;
+}
+
+.param-box {
+    flex: 1;
+    min-width: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 3px 10px var(--shadow-color);
+    transition: all 0.3s ease;
+}
+
+.param-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px var(--shadow-color);
+}
+
+.param-box i {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.param-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.param-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.param-label {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    margin-top: 3px;
+}
+
+/* Parameter Box Colors */
+.wind-box i {
+    background: rgba(33, 150, 243, 0.2);
+    color: #2196F3;
+}
+.humidity-box i {
+    background: rgba(3, 169, 244, 0.2);
+    color: #03A9F4;
+}
+.pressure-box i {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+}
+.rain-box i {
+    background: rgba(0, 188, 212, 0.2);
+    color: #00BCD4;
+}
+.sunrise-box i {
+    background: rgba(255, 193, 7, 0.2);
+    color: #FFC107;
+}
+.sunset-box i {
+    background: rgba(255, 152, 0, 0.2);
+    color: #FF9800;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .param-row {
+        flex-wrap: wrap;
+    }
+    .param-box {
+        min-width: calc(50% - 6px);
+    }
+}
+
+@media (max-width: 480px) {
+    .param-box {
+        min-width: 100%;
+    }
+}
+
+/* Keep all your existing CSS below this line */
+/* (Your original styles for other elements remain unchanged) */
+.app-footer {
+    text-align: center;
+    margin-top: 0;
+    padding: 10px;
+}
+
+.github-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.9rem;
 }
