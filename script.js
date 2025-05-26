@@ -1,7 +1,7 @@
 /* weather-app.js - v3.0.0 */
 /* Complete refactor with Fahrenheit & sunrise/sunset support */
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // DOM Elements
     const elements = {
         cityInput: document.getElementById('cityInput'),
@@ -87,27 +87,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Temperature Conversion
     function convertTemperature(temp, toFahrenheit) {
-        return toFahrenheit ? (temp * 9/5) + 32 : (temp - 32) * 5/9;
+        return toFahrenheit ? (temp * 9 / 5) + 32 : (temp - 32) * 5 / 9;
     }
 
     // Toggle Temperature Unit
     function toggleTemperatureUnit() {
         config.useFahrenheit = !config.useFahrenheit;
         elements.toggleUnit.textContent = config.useFahrenheit ? '°C' : '°F';
-        
+
         // Convert current temp
         const currentTemp = parseFloat(elements.currentTemp.textContent);
         elements.currentTemp.textContent = Math.round(
-            config.useFahrenheit 
+            config.useFahrenheit
                 ? convertTemperature(currentTemp, true)
                 : convertTemperature(currentTemp, false)
         );
-        
+
         // Convert forecast temps
         document.querySelectorAll('.forecast-day .temp-high, .forecast-day .temp-low').forEach(el => {
             const temp = parseInt(el.textContent);
             el.textContent = Math.round(
-                config.useFahrenheit 
+                config.useFahrenheit
                     ? convertTemperature(temp, true)
                     : convertTemperature(temp, false)
             ) + '°';
@@ -117,8 +117,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Format Time from Timestamp
     function formatTime(timestamp, timezone, withSeconds = false) {
         const date = new Date((timestamp + timezone) * 1000);
-        return date.toLocaleTimeString([], { 
-            hour: '2-digit', 
+        return date.toLocaleTimeString([], {
+            hour: '2-digit',
             minute: '2-digit',
             second: withSeconds ? '2-digit' : undefined,
             timeZone: 'UTC'
@@ -128,19 +128,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update Local Date & Time
     function updateLocalDateTime(timezoneOffset) {
         if (config.cityTimeInterval) clearInterval(config.cityTimeInterval);
-        
+
         const updateTime = () => {
             const now = new Date();
             const utc = now.getTime() + now.getTimezoneOffset() * 60000;
             const cityTime = new Date(utc + (timezoneOffset * 1000));
-            
-            elements.currentDateEl.textContent = cityTime.toLocaleDateString(undefined, { 
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+
+            elements.currentDateEl.textContent = cityTime.toLocaleDateString(undefined, {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
             });
-            
+
             elements.currentTimeEl.textContent = cityTime.toLocaleTimeString();
         };
-        
+
         updateTime();
         config.cityTimeInterval = setInterval(updateTime, 1000);
     }
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function fetchWeather(city) {
         try {
             showLoadingStates();
-            
+
             const [currentData, forecastData, aqiData, uvData] = await Promise.all([
                 fetchData(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${config.API_KEY}`),
                 fetchData(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${config.API_KEY}`),
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 try {
                     showLoadingStates();
                     const { latitude, longitude } = position.coords;
-                    
+
                     const [currentData, forecastData, aqiData, uvData] = await Promise.all([
                         fetchData(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${config.API_KEY}`),
                         fetchData(`https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&units=metric&appid=${config.API_KEY}`),
@@ -243,45 +243,49 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.windSpeed.textContent = `${Math.round(currentData.wind.speed * 3.6)} km/h`;
         elements.humidity.textContent = `${currentData.main.humidity}%`;
         elements.pressure.textContent = `${currentData.main.pressure} hPa`;
-        
+
         // Sunrise/Sunset
         elements.sunriseTime.textContent = formatTime(currentData.sys.sunrise, currentData.timezone);
         elements.sunsetTime.textContent = formatTime(currentData.sys.sunset, currentData.timezone);
-        
+
         // Weather Icon
         const iconCode = currentData.weather[0].icon;
         elements.weatherIcon.innerHTML = `<i class="${weatherIcons[iconCode] || 'fas fa-question'}"></i>`;
-        
+
         // Rain Chance
         const todayRainChance = calculateRainChance(forecastData);
         elements.rainChance.textContent = `${todayRainChance}%`;
         elements.rainChance.classList.toggle('high-rain-chance', todayRainChance > 50);
-        
+
         // Health Advisories
         displayHealthAdvisories(currentData, aqiData, uvData, tempCelsius, todayRainChance);
-        
+
         // Forecast
         displayForecast(forecastData);
-        
+
         // Update Time
         updateLocalDateTime(currentData.timezone);
-        
+
         // Animate Elements
         animateElements();
     }
 
     // Calculate Rain Chance
     function calculateRainChance(forecastData) {
-        const today = new Date().toLocaleDateString('en-US', { weekday: 'short' });
+        // Get today's date in the same format as API
+        const today = new Date().toISOString().split('T')[0];
+
+        // Filter forecasts for today only
         const todayForecasts = forecastData.list.filter(item => {
-            const date = new Date(item.dt * 1000);
-            return date.toLocaleDateString('en-US', { weekday: 'short' }) === today;
+            const forecastDate = new Date(item.dt * 1000).toISOString().split('T')[0];
+            return forecastDate === today;
         });
-        
+
         if (todayForecasts.length === 0) return 0;
-        
-        const totalPop = todayForecasts.reduce((sum, item) => sum + (item.pop || 0), 0);
-        return Math.round((totalPop / todayForecasts.length) * 100);
+
+        // Calculate max pop (probability of precipitation) for today
+        const maxPop = Math.max(...todayForecasts.map(item => item.pop || 0));
+        return Math.round(maxPop * 100);
     }
 
     // Display Health Advisories
@@ -295,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             elements.uvAdviceEl.textContent = 'UV data unavailable';
         }
-        
+
         // Air Quality
         if (aqiData?.list?.[0]?.main?.aqi !== undefined) {
             const aqi = aqiData.list[0].main.aqi;
@@ -305,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             elements.airQualityAdvice.textContent = 'Air quality data unavailable';
         }
-        
+
         // Activity Suggestion
         const isDay = !currentData.weather[0].icon.includes('n');
         elements.suggestedActivity.textContent = getActivitySuggestion(
@@ -313,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function() {
             currentData.weather[0].main,
             isDay
         );
-        
+
         // Weather Advice
         elements.weatherAdvice.textContent = getWeatherAdvice(
             currentData.weather[0].main,
@@ -325,12 +329,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Display Forecast
     function displayForecast(forecastData) {
         elements.forecastDays.innerHTML = '';
-        
+
         const dailyForecast = {};
         forecastData.list.forEach(item => {
             const date = new Date(item.dt * 1000);
             const day = date.toLocaleDateString('en-US', { weekday: 'short' });
-            
+
             if (!dailyForecast[day]) {
                 dailyForecast[day] = {
                     temps: [],
@@ -338,27 +342,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     pop: []
                 };
             }
-            
+
             dailyForecast[day].temps.push(item.main.temp);
             dailyForecast[day].icons.push(item.weather[0].icon);
             dailyForecast[day].pop.push(item.pop || 0);
         });
-        
+
         Object.keys(dailyForecast).slice(0, 5).forEach(day => {
             const dayData = dailyForecast[day];
             const maxTemp = Math.round(Math.max(...dayData.temps));
             const minTemp = Math.round(Math.min(...dayData.temps));
             const avgPop = Math.round((dayData.pop.reduce((a, b) => a + b, 0) / dayData.pop.length) * 100);
-            
+
             // Most frequent icon
             const iconCounts = {};
             dayData.icons.forEach(icon => {
                 iconCounts[icon] = (iconCounts[icon] || 0) + 1;
             });
-            const mostFrequentIcon = Object.keys(iconCounts).reduce((a, b) => 
+            const mostFrequentIcon = Object.keys(iconCounts).reduce((a, b) =>
                 iconCounts[a] > iconCounts[b] ? a : b
             );
-            
+
             const forecastDayElement = document.createElement('div');
             forecastDayElement.className = 'forecast-day';
             forecastDayElement.innerHTML = `
@@ -370,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 ${avgPop > 20 ? `<div class="rain-chance"><i class="fas fa-umbrella"></i> ${avgPop}%</div>` : ''}
             `;
-            
+
             elements.forecastDays.appendChild(forecastDayElement);
         });
     }
@@ -395,7 +399,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function getUVAdvice(uvIndex) {
         let colorClass, advice;
-        
+
         if (uvIndex <= 2) {
             colorClass = 'uv-low';
             advice = 'Low risk. Enjoy outdoor activities!';
@@ -412,7 +416,7 @@ document.addEventListener('DOMContentLoaded', function() {
             colorClass = 'uv-extreme';
             advice = 'Extreme risk. Avoid sun exposure between 10am-4pm.';
         }
-        
+
         return { advice, colorClass };
     }
 
@@ -424,7 +428,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const isCold = temp < 10;
         const isWarm = temp >= 20 && temp < 30;
         const isHot = temp >= 30;
-        
+
         if (!isDay) return isClear ? "Perfect night for stargazing 🌌" : "Great evening for a movie night indoors 🍿";
         if (isSnowy) return temp < -5 ? "Too cold! Stay warm with hot chocolate ❄️" : "Great day for skiing or building a snowman ⛷️";
         if (isRainy) return isCold ? "Cozy day for reading by the window ☔" : "Perfect for museum visits or indoor activities 🌧️";
@@ -436,14 +440,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function getWeatherAdvice(weather, temp, rainChance) {
         const weatherMain = weather.toLowerCase();
-        
+
         if (rainChance > 70) return `🌧️ High chance of rain (${rainChance}%)! Definitely bring an umbrella and waterproof gear.`;
         if (rainChance > 40) return `☔ Possible rain (${rainChance}%) - consider carrying an umbrella just in case.`;
         if (weatherMain.includes('thunderstorm')) return "⚡ Thunderstorm alert! Stay indoors, unplug electronics, and avoid using wired devices.";
         if (weatherMain.includes('snow') && temp < -10) return "❄️ Extreme cold warning! Limit outdoor exposure and dress in layers.";
         if (temp > 35) return "🔥 Heat warning! Stay hydrated, avoid direct sun, and check on vulnerable individuals.";
         if (temp < 0) return "🧊 Freezing temperatures! Watch for ice and protect pipes from freezing.";
-        
+
         return "🌤️ Weather looks moderate! Enjoy your day with appropriate clothing for the temperature.";
     }
 
